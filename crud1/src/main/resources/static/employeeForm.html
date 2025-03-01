@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.0/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Employee</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="employeeForm">
+                        <input type="hidden" id="employeeId">
+                        <div class="form-group mb-3">
+                            <label for="employeeName">Name:</label>
+                            <input type="text" class="form-control" id="employeeName" placeholder="Enter the name" required>
+                        </div>
+                        <!-- DOJ input field -->
+<div class="form-group mb-3">
+    <label for="employeedoj">Date of Joining</label>
+    <input type="date" class="form-control" id="employeedoj" required>
+</div>
+
+                        <div class="form-group mb-3">
+                            <label for="employeeStatus" class="form-label">Status:</label>
+                            <select class="form-control" id="employeeStatus" required>
+                                <option value="">Please set Emp status</option>
+                                <option value="1">Active</option>
+                                <option value="0">Retired</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="employeeSalary">Salary:</label>
+                            <input type="number" class="form-control" id="employeeSalary" placeholder="Enter the Salary" required>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a href="employeeList.html" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SweetAlert2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.0/dist/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (id) {
+                $('#formTitle').text('Edit Employee');
+                $.ajax({
+                    url: `http://localhost:4002/api/employee/${id}`,
+                    method: 'GET',
+                    success: function(employee) {
+                        $('#employeeId').val(employee.id);
+                        $('#employeeName').val(employee.name);
+                        $('#employeedoj').val(employee.doj);
+                        $('#employeeStatus').val(employee.status);
+                        $('#employeeSalary').val(employee.salary);
+                    },
+                    error: function() {
+                        Swal.fire("Error!", "Something went wrong while fetching the employee data.", "error");
+                    }
+                });
+            }
+
+            $('#employeeForm').on('submit', function(event) {
+                event.preventDefault();
+                const employee = {
+                    id: $('#employeeId').val(),
+                    name: $('#employeeName').val(),
+                    doj: $('#employeedoj').val(),
+                    status: $('#employeeStatus').val(),
+                    salary: $('#employeeSalary').val()
+                };
+
+                if (employee.id) {
+                    // Update existing employee
+                    $.ajax({
+                        url: `http://localhost:4002/api/employee/${employee.id}`,
+                        method: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify(employee),
+                        success: function() {
+                            Swal.fire({
+                                title: "Saved!",
+                                text: "Employee has been saved successfully.",
+                                icon: "success",
+                                confirmButtonText: "OK"
+                            }).then(() => {
+                                window.location.href = 'employeeList.html';
+                            });
+                        },
+                        error: function() {
+                            Swal.fire("Error!", "Something went wrong while updating the employee.", "error");
+                        }
+                    });
+                } else {
+                    // Add new employee
+                    $.ajax({
+                        url: 'http://localhost:4002/api/employee',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(employee),
+                        success: function() {
+                            Swal.fire({
+                                title: "Added!",
+                                text: "New employee has been added successfully.",
+                                icon: "success",
+                                confirmButtonText: "OK"
+                            }).then(() => {
+                                window.location.href = 'employeeList.html';
+                            });
+                        },
+                        error: function() {
+                            Swal.fire("Error!", "Something went wrong while adding the employee.", "error");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    <!-- Bootstrap JS and Popper.js (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
